@@ -22,12 +22,21 @@
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = import nixpkgs {inherit system;};
       nixvim' = nixvim.legacyPackages.${system};
-      nvim = nixvim'.makeNixvim {};
+      nvim = nixvim'.makeNixvimWithModule {
+        module = import ./module.nix;
+        extraSpecialArgs = {
+          plugins = import ./plugins.nix {inherit pkgs;};
+        };
+      };
     in {
       packages = {
         inherit nvim;
         default = nvim;
       };
-      devShells.default = pkgs.mkShell {};
+      devShells.default = pkgs.mkShell {
+        buildInputs = [
+          nvim
+        ];
+      };
     });
 }
